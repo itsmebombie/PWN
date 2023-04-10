@@ -1,0 +1,60 @@
+/*
+ 3 digits, no timer (yet):troll:
+
+ we can convert the 3 digit number to a 9bit int
+ because the biggest binary number that can fit
+ in a 3 digit decimal number is 111111111 (512)
+ which is 9 bits long.
+
+ the structure of our binary number is really
+ simple, first 4 bits are the selected piece
+ and the last 5 bits are the space it moves
+ to. a representation in binary of a normal
+ moves would look like this:
+ 1100 00001 (385), where the first 4 bits
+ mean 12 and the last 5 beats mean 1 in
+ decimal. this move is actually "e4".
+
+ short confession: i get no bitches😎
+
+ let's make another move though. let's say
+ we just performed fool's mate. assuming
+ we are white and we move "Qh5#", that
+ would be 0011 00011 (099) if the queen can
+ only move diagonally to the right.
+
+ the way we handle resigns is having a
+ certain number for it. it could be
+ anything as long as it does not go
+ under 512 in our case. although i do
+ not think it's that necessary, i still
+ decided to add it.
+
+*/
+
+
+// headers
+
+// extract obj_props
+// gs = import gamescene
+
+// import "pwn.spwn"
+// extract import "constant.spwn"
+
+TEST = true
+// CONSOLE = true
+
+if TEST {
+    import "test.spwn"
+    throw "testing was successful"
+}
+// if CONSOLE {
+//     import "console.spwn"
+//     throw "game finished" // i wanna do it so we can implement it easier in gd
+// } // no way, and then it generates a replay to view in gd 🤯🤯🤯🤯🤯🤯🤯
+
+
+import "runtime.spwn"
+
+
+// great main.spwn file bro

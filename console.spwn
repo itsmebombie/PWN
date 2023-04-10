@@ -1,0 +1,156 @@
+extract import "constant.spwn"
+
+get_move = () {
+    while true {
+        let move = $.get_input("move: ")
+        move = move.replace(" +","").split("")
+        if move.length != 4 { continue }
+        if move.filter(v => v.matches(r"\d")).length != 4 { continue }
+        if move.filter(v => @number(v) is >=1&<=8).length != 4 { continue }
+        return {
+            from: [move[0], move[1]],
+            to: [move[2], move[3]],
+        }
+    }
+}
+
+init_board = () {
+    empty_row = [EMPTY]*8
+    // the real cool board 😎😋
+    return [
+        [
+            BLACK_ROOK, BLACK_KNIGHT, BLACK_BISHOP, 
+            BLACK_QUEEN, BLACK_KING, 
+            BLACK_BISHOP, BLACK_KNIGHT, BLACK_ROOK
+        ],
+        [BLACK_PAWN]*8,
+        *([empty_row]*4),  ////  detstrucutre :silly:
+        [WHITE_PAWN]*8,
+        [
+            WHITE_ROOK, WHITE_KNIGHT, WHITE_BISHOP, 
+            WHITE_QUEEN, WHITE_KING, 
+            WHITE_BISHOP, WHITE_KNIGHT, WHITE_ROOK
+        ],
+    ] // let's try it
+
+    // return {
+    //     black: {
+    //         // in gd we would have something like this:
+    //         pawns: [ counter((63-i) - 8, bits = 6) for i in 0..8 ],
+    //         // other types
+    //     },
+    //     white: {
+    //         // in gd we would have something like this:
+    //         pawns: [ counter(i + 8, bits = 6) for i in 0..8 ],
+    //         // other types
+    //     },
+    //     board:  [ counter(1, bits = 2) for i in 0..16 ] +  // white
+    //             [ counter(0, bits = 2) for i in 16..48 ] + // empty
+    //             [ counter(2, bits = 2) for i in 48..64 ]   // black
+    // }
+}
+
+board = init_board()
+
+position_to_index = (x, y) => y * 8 + x
+
+// true on lowercase (black), false on uppercase (white)
+piece_is_black = (piece: @string) => piece.lowercase() == piece
+
+// turn based, so we dont need the color.
+// wait we do on one device multiplayer lmao
+// nvm we dont, its still turn based :skull:
+// although we need a turn counter
+
+let turn_counter = WHITE
+// bombie: make code easy to read!!!
+// also bombie:
+y_move_multi = () => -1 if turn_counter == BLACK else 1
+flip_board_edges_if_black_turn = (index: @number) => 63-index if turn_counter == BLACK else index
+
+// move_piece = (&board, piece_position: @number/*@counter*/, move_to: @number/*@counter*/, color: @bool) { // (&board, start_x, start_y, to_x, to_y) {
+//     piece_position = get_piece_position(piece, color)
+//     // ok so bascially you have the variable piece_position, yeah thats the position (its from 0-63)
+//     match piece {
+//         ==PAWN: () {
+//             x = piece_position % 8 // not useful
+//             y = $.floor(piece_position / 8) // actualyl useful!"!!"
+//             // how for double pawn move bro
+//             // bombie: make code easy to read!!!
+//             // also bombie:
+//             avaliable_squares = [
+//                 8*y_move_multi(),
+//                 16*y_move_multi() if flip_board_edges_if_black_turn(piece_position) < 16 else null,
+//             ].filter(v => v != null) // whats filter removes everything that isn't true i see
+            
+//             player_input = 2 // lets say they wanted to move to their second move
+//             // which is coicidentally moving 2 squares forward
+
+//             piece_position <=> avaliable_squares[player_input]
+//             piece_position <=> avaliable_squares[player_input]
+//             // ngl i wanna try continuing it withj counters, i mean we already have the move
+//             // system kinda done
+
+//             // this should be it i think, we only need to check for other pawns but thats simple
+//             // wait we should change in constant.spwn 0 to nothing, pawn to 1
+//             // oh shit we dont have a copy of the board, we need to check if theres a piece there by
+//             // iterating through all of the pieces
+//             // or just add a board array :trollface:
+//             // OH SHIT I FORGOT WE WERE DOING IT WITH COLLISION BLOCKS LMAO
+//             // now what :bingu:
+//             // colison books bro lmao jk💀🤯😭🤯🤯🤯💀💀🤯🤯💀😎re😎al
+//             // yeah, doing it with counters is extremely inefficent, that's a big issue
+//             // ok now we need to move it, should be simple enough
+//         } (),
+//     }
+
+//     // hold on i need to visualize this
+    
+//     //     ['r', 'n', 'b', 'q', 'k', 'b', 'n', 63 ] -0
+//     //     ['p', 'p', 'p', 'p', 'p', 'p', 'p', 55 ] -8
+//     //     [' ', ' ', ' ', ' ', ' ', ' ', ' ', 47 ] -8
+//     //     [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '] etc
+//     // etc [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']
+//     // +8  [ 16, ' ', ' ', ' ', ' ', ' ', ' ', 23 ]
+//     // +8  [ 8 , 'P', 'P', 'P', 'P', 'P', 'P', 'P']
+//     // +0  [ 0 , 'N', 'B', 'Q', 'K', 'B', 'N', 'R'] // basically checks if its on the first or 2nd row
+//     // but it can never be on the first row so
+//     // it's not an issue, but actually it's part of the torpedo rule the fact that pawns can double move on first line
+    
+//     // 8*y_move_multi() // if blacks turn 8*-1 else 8 
+//     // 16*y_move_multi() if flip_board_edges_if_black_turn(piece_position) < 16 else null, 
+//     // // yup this works fine
+
+
+
+//     // because as we have the strings currently, we can't know if a pawn is number one, or number two
+//     // can't piece just be from_x, from_y unless converting it is more efficient, we should stick with it
+//     // piece is 0..32 // why 0..32 and not 0..64 or something, idk oh shit its 0..16
+//     // x 0..8
+//     // y 0..8
+
+//     // piece = board[position_to_index(start_x, start_y)]
+//     // board[position_to_index(to_x, to_y)] = piece
+//     // board[position_to_index(start_x, start_y)] = " "
+
+//     // piece system or coords?
+    
+//     // for compiletime, cords
+//     // but shouldnt we like replicate the exact system so we can easily implement it into gd
+//     // ^^^^^^
+//     // then instead of strings we need to store numbers / indexes
+//     // but then dont we also need to store colors obviously, otherwise you couldn't know
+//     // got an idea
+//     // what if 
+
+//     // black_pieces = [] // arrays at runtime, get real
+//     // white_pieces = [] // e:xploding head:
+
+//     // also, we need to store if the king or the rooks moved previously
+//     // and if the last move was a torpedo pawn move (for en-ass-ant)
+//     // we can store it locally, we dont need to send that info through the 3 digit number thingy
+//     // yeah, that's clear
+
+// }
+
+

@@ -1,0 +1,34 @@
+extract import "constant.spwn"
+import "pwn.spwn"
+
+$.print(@piece::WHITE_MOVED_PAWN)
+$.print(@piece::WHITE_KNIGHT)
+$.print(@piece::WHITE_BISHOP)
+$.print(@piece::WHITE_ROOK)
+$.print(@piece::WHITE_EN_PASSANTABLE_PAWN)
+$.print(@piece::WHITE_KING)
+
+$.print()
+
+$.print(@piece::BLACK_PAWN)
+$.print(@piece::BLACK_KNIGHT)
+$.print(@piece::BLACK_BISHOP)
+$.print(@piece::BLACK_ROOK)
+$.print(@piece::BLACK_QUEEN)
+$.print(@piece::BLACK_KING)
+
+// constants testing
+$.assert(@piece::WHITE_MOVED_PAWN.kind == WHITE_MOVED_PAWN)
+$.assert(@piece::BLACK_KNIGHT.kind == BLACK_KNIGHT)
+$.assert(@piece::WHITE_BISHOP.kind == WHITE_BISHOP)
+$.assert(@piece::BLACK_ROOK.kind == BLACK_ROOK)
+$.assert(@piece::WHITE_EN_PASSANTABLE_PAWN.kind == WHITE_EN_PASSANTABLE_PAWN)
+$.assert(@piece::BLACK_KING.kind == BLACK_KING)
+
+// ethnicity 
+$.assert(@piece::BLACK_KING.color == BLACK)
+$.assert(@piece::WHITE_KING.color == WHITE)
+$.assert(@piece::BLACK_QUEEN.color == BLACK)
+$.assert(@piece::WHITE_QUEEN.color == WHITE)
+// lmao
+// I'll do one quick I'm against 2200 elo 💀 lmao I lost, nvm then 

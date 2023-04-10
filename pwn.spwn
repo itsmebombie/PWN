@@ -1,0 +1,139 @@
+extract obj_props
+extract import "constant.spwn"
+
+// I was like "chess" and my mum was like "is it really that ugly???"
+// "cesso" means toilet in italian
+BLACK = hex("#77965b") // ces.cum 
+WHITE = hex("#eeedd4") // trur
+black_color = ?c
+black_color.set(BLACK)
+white_color = ?c
+white_color.set(WHITE)
+
+type @pwn
+impl @pwn {
+    new: (x_pos: @number = 0, y_pos: @number = 0, scale: @number = 1) {
+        for x in 0..8 {
+            for y in 0..8 {
+                $.add(obj {
+                    OBJ_ID: 211, // white block
+                    X: x_pos + x * 30 * scale,
+                    Y: y_pos + y * 30 * scale,
+                    SCALING: scale + 0.01, // fix visual move glitching
+                    // TODO: check if color black is in the left bottom edge
+                    COLOR: white_color if (x % 2 + (y + 1) % 2) % 2 == 0 else black_color,
+                })
+            }
+        }
+        return @pwn::{
+            scale,
+        }
+    },
+}
+
+type @piece
+impl @piece {
+    new: (kind: @number) { // number that gets turned into an array of bits fair
+        match kind {
+            in @array(0..32): () { /* spwn monster */ } (),
+            else: () { throw "wrong piece input" } (),
+        }
+
+        bits = [ $.floor(kind / (2^i)) % 2 for i in 0..3 ].reverse()
+        name = match kind {
+            ==WHITE_PAWN|==WHITE_MOVED_PAWN|==WHITE_EN_PASSANTABLE_PAWN: "PAWN",
+            ==WHITE_KNIGHT: "KNIGHT",
+            ==WHITE_BISHOP: "BISHOP",
+            ==WHITE_ROOK|==WHITE_MOVED_ROOK: "ROOK",
+            ==WHITE_QUEEN: "QUEEN",
+            ==WHITE_KING|==WHITE_MOVED_KING: "KING",
+
+            ==BLACK_PAWN|==BLACK_MOVED_PAWN|==BLACK_EN_PASSANTABLE_PAWN: "PAWN",
+            ==BLACK_KNIGHT: "KNIGHT",
+            ==BLACK_BISHOP: "BISHOP",
+            ==BLACK_ROOK|==BLACK_MOVED_ROOK: "ROOK",
+            ==BLACK_QUEEN: "QUEEN",
+            ==BLACK_KING|==BLACK_MOVED_KING: "KING",
+        }
+        nm = match kind {
+            ==WHITE_PAWN|==WHITE_MOVED_PAWN|==WHITE_EN_PASSANTABLE_PAWN: "PWN",
+            ==WHITE_KNIGHT: "KNGHT",
+            ==WHITE_BISHOP: "BSHP",
+            ==WHITE_ROOK|==WHITE_MOVED_ROOK: "RK",
+            ==WHITE_QUEEN: "QN",
+            ==WHITE_KING|==WHITE_MOVED_KING: "KNG",
+
+            ==BLACK_PAWN|==BLACK_MOVED_PAWN|==BLACK_EN_PASSANTABLE_PAWN: "PWN",
+            ==BLACK_KNIGHT: "KNGHT",
+            ==BLACK_BISHOP: "BSHP",
+            ==BLACK_ROOK|==BLACK_MOVED_ROOK: "RK",
+            ==BLACK_QUEEN: "QN",
+            ==BLACK_KING|==BLACK_MOVED_KING: "KNG",
+        }
+        symbol = match kind {
+            ==WHITE_PAWN|==WHITE_MOVED_PAWN|==WHITE_EN_PASSANTABLE_PAWN: "P",
+            ==WHITE_KNIGHT: "N",
+            ==WHITE_BISHOP: "B",
+            ==WHITE_ROOK|==WHITE_MOVED_ROOK: "R",
+            ==WHITE_QUEEN: "Q",
+            ==WHITE_KING|==WHITE_MOVED_KING: "K",
+
+            ==BLACK_PAWN|==BLACK_MOVED_PAWN|==BLACK_EN_PASSANTABLE_PAWN: "P",
+            ==BLACK_KNIGHT: "N",
+            ==BLACK_BISHOP: "B",
+            ==BLACK_ROOK|==BLACK_MOVED_ROOK: "R",
+            ==BLACK_QUEEN: "Q",
+            ==BLACK_KING|==BLACK_MOVED_KING: "K",
+        }
+        value = match kind {
+            ==WHITE_PAWN|==WHITE_MOVED_PAWN|==WHITE_EN_PASSANTABLE_PAWN: 1,
+            ==WHITE_KNIGHT: 3,
+            ==WHITE_BISHOP: 3,
+            ==WHITE_ROOK|==WHITE_MOVED_ROOK: 5,
+            ==WHITE_QUEEN: 9,
+            ==WHITE_KING|==WHITE_MOVED_KING: 15,
+
+            ==BLACK_PAWN|==BLACK_MOVED_PAWN|==BLACK_EN_PASSANTABLE_PAWN: 1,
+            ==BLACK_KNIGHT: 3,
+            ==BLACK_BISHOP: 3,
+            ==BLACK_ROOK|==BLACK_MOVED_ROOK: 5,
+            ==BLACK_QUEEN: 9,
+            ==BLACK_KING|==BLACK_MOVED_KING: 15,
+        }
+
+        return @piece::{
+            kind, 
+            bits,
+            value,
+            name,
+            nm,
+            symbol,
+            design: symbol.to_obj(),
+            color: kind > 15,
+        }
+    },
+}
+
+impl @piece {
+    WHITE_PAWN: @piece::new(WHITE_PAWN),
+    WHITE_MOVED_PAWN: @piece::new(WHITE_MOVED_PAWN),
+    WHITE_EN_PASSANTABLE_PAWN: @piece::new(WHITE_EN_PASSANTABLE_PAWN),
+    WHITE_KNIGHT: @piece::new(WHITE_KNIGHT),
+    WHITE_BISHOP: @piece::new(WHITE_BISHOP),
+    WHITE_ROOK: @piece::new(WHITE_ROOK),
+    WHITE_MOVED_ROOK: @piece::new(WHITE_MOVED_ROOK),
+    WHITE_QUEEN: @piece::new(WHITE_QUEEN),
+    WHITE_KING: @piece::new(WHITE_KING),
+    WHITE_MOVED_KING: @piece::new(WHITE_MOVED_KING),
+    
+    BLACK_PAWN: @piece::new(BLACK_PAWN),
+    BLACK_MOVED_PAWN: @piece::new(BLACK_MOVED_PAWN),
+    BLACK_EN_PASSANTABLE_PAWN: @piece::new(BLACK_EN_PASSANTABLE_PAWN),
+    BLACK_KNIGHT: @piece::new(BLACK_KNIGHT),
+    BLACK_BISHOP: @piece::new(BLACK_BISHOP),
+    BLACK_ROOK: @piece::new(BLACK_ROOK),
+    BLACK_MOVED_ROOK: @piece::new(BLACK_MOVED_ROOK),
+    BLACK_QUEEN: @piece::new(BLACK_QUEEN),
+    BLACK_KING: @piece::new(BLACK_KING),
+    BLACK_MOVED_KING: @piece::new(BLACK_MOVED_KING),
+}

@@ -1,0 +1,125 @@
+
+// headers
+
+extract obj_props
+gs = import gamescene
+
+import "pwn.spwn"
+extract import "constant.spwn"
+
+offset_x = 69
+offset_y = 42
+
+// actual code
+
+init_board = () {
+    block_ids = {WHITE: [?b for _ in 0..16], BLACK: [?b for _ in 48..64]}
+
+    for i in 0..2 {
+        for j in 0..8 {
+            $.add(obj{
+                OBJ_ID: 1816,
+                X: offset_x + i*30,
+                Y: offset_y + j*30,
+                SCALING: 0.5,
+                BLOCK_A: block_ids.WHITE[(i*2) + j],
+                DYNAMIC_BLOCK: false,
+            })
+        }
+    }
+
+    for i in 6..8 {
+        for j in 0..8 {
+            $.add(obj{
+                OBJ_ID: 1816,
+                X: offset_x + i*30,
+                Y: offset_y + j*30,
+                SCALING: 0.5,
+                BLOCK_A: block_ids.BLACK[((i-6)*2) + j],
+                DYNAMIC_BLOCK: false,
+            })
+        }
+    }
+
+    empty_row = [counter(EMPTY, bits=5)]*8
+    return {
+        counter_board: [*[
+            [
+                counter(BLACK_ROOK, bits=5), counter(BLACK_KNIGHT, bits=5), counter(BLACK_BISHOP, bits=5), 
+                counter(BLACK_QUEEN, bits=5), counter(BLACK_KING, bits=5), 
+                counter(BLACK_BISHOP, bits=5), counter(BLACK_KNIGHT, bits=5), counter(BLACK_ROOK, bits=5),
+            ], // topmost row
+            [counter(BLACK_PAWN, bits=5)]*8, // a row of black pawns
+            *([empty_row]*4),  ////  detstrucutre :silly: // 4 rows of empty space
+            [counter(WHITE_PAWN, bits=5)]*8, // a row of white pawns
+            [
+                counter(WHITE_ROOK, bits=5), counter(WHITE_KNIGHT, bits=5), counter(WHITE_BISHOP, bits=5), 
+                counter(WHITE_QUEEN, bits=5), counter(WHITE_KING, bits=5), 
+                counter(WHITE_BISHOP, bits=5), counter(WHITE_KNIGHT, bits=5), counter(WHITE_ROOK, bits=5),
+            ], // bottommost row
+        ]],
+        collision_board: block_ids,
+    }
+}
+
+__board = init_board()
+piece_mapped_board = __board.counter_board
+color_mapped_board = __board.collision_board
+
+
+$.print(__board)
+
+
+
+
+
+
+// this is actually the load code part :spinningskull:
+load_code = () {
+    number_counters = [counter(bits=10), counter(bits=10), counter(bits=4)]
+    number_counters_idx = counter()
+    
+    for i in 0..number_counters.length {
+        number_counters[i].display(200+i*30, 90)
+    }
+
+    bit_counters = [counter(bits=1), counter(bits=1), counter(bits=1), counter(bits=1), counter(bits=1), counter(bits=1), counter(bits=1), counter(bits=1), counter(bits=1)]
+    for i in 0..bit_counters.length {
+        bit_counters[i].display(140+i*30, 30)
+    }
+
+    // cycle through digits
+    on(gs.button_a(), !{
+        if number_counters_idx == 2 {
+            number_counters_idx -= 2
+        } else {
+            number_counters_idx ++
+        }
+    })
+
+    // current digit += 1
+    on(gs.button_b(), !{
+        c = number_counters[number_counters_idx.to_const(0..3)]
+        if c == 9 {
+            c -= 9
+        } else {
+            c ++
+        }
+    })
+    @log::runtime::flash(fade_out=4)
+    wait(4)
+    @log::runtime::flash(fade_in=1, fade_out=0)
+    wait(1)
+    
+    three_digit_number = number_counters[2] // changing the last digit from the input to all of them joined to save objects or something idk
+    number_counters[0].copy_to(three_digit_number, factor=100) //thank oyu spu7nix
+    number_counters[1].copy_to(three_digit_number, factor=10)//thank oyu spu7nix
+    for i in 0..9 {
+        if three_digit_number > 2^(8-i)-1 {
+            three_digit_number -= 2^(8-i)
+            bit_counters[i]++
+        }
+    }
+}
+
+// load_code()
