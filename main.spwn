@@ -41,7 +41,7 @@
 // import "pwn.spwn"
 // extract import "constant.spwn"
 
-TEST = true
+TEST = false
 // CONSOLE = true
 
 if TEST {

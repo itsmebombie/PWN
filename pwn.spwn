@@ -69,7 +69,7 @@ impl @piece {
             ==BLACK_ROOK|==BLACK_MOVED_ROOK: "RK",
             ==BLACK_QUEEN: "QN",
             ==BLACK_KING|==BLACK_MOVED_KING: "KNG",
-        }
+        }   
         symbol = match kind {
             ==WHITE_PAWN|==WHITE_MOVED_PAWN|==WHITE_EN_PASSANTABLE_PAWN: "P",
             ==WHITE_KNIGHT: "N",

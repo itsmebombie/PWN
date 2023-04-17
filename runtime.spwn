@@ -15,8 +15,8 @@ offset_y = 42
 init_board = () {
     block_ids = {WHITE: [?b for _ in 0..16], BLACK: [?b for _ in 48..64]}
 
-    for i in 0..2 {
-        for j in 0..8 {
+    for j in 0..2 {
+        for i in 0..8 {
             $.add(obj{
                 OBJ_ID: 1816,
                 X: offset_x + i*30,
@@ -28,8 +28,8 @@ init_board = () {
         }
     }
 
-    for i in 6..8 {
-        for j in 0..8 {
+    for j in 6..8 {
+        for i in 0..8 {
             $.add(obj{
                 OBJ_ID: 1816,
                 X: offset_x + i*30,
@@ -62,12 +62,115 @@ init_board = () {
     }
 }
 
+init_selector = () {
+    // info = {
+    //     BLOCK_IDS: [?b for _ in 0..35], // calculated this, apparently you need to have 35 move squares in total
+    //     // // the next 2 dicts are full of groups which will be used to move the collision blocks,
+    //     // // so they should only be attached to move triggers and nothing else, unless i change my mind lmao
+    //     // OBSTRUCT_GROUP_IDS: { // for pieces that can get blocked by others to go in the same direction
+    //     //     // queens combine both the rook's and the bishop's move thingies.
+    //     //     ROOK_UP: ?g,
+    //     //     ROOK_DOWN: ?g,
+    //     //     ROOK_LEFT: ?g,
+    //     //     ROOK_RIGHT: ?g,
+
+    //     //     BISHOP_UP_LEFT: ?g,
+    //     //     BISHOP_UP_RIGHT: ?g, 
+    //     //     BISHOP_DOWN_RIGHT: ?g,
+    //     //     BISHOP_DOWN_LEFT: ?g,
+
+    //     //     STARTING_PAWN: ?g,
+    //     // },
+        
+    // }
+
+    GROUP_IDS = {
+        PAWN: ?g,
+        PAWN_KILL: ?g,
+        STARTING_PAWN: ?g,
+        KNIGHT: ?g,
+        ROOK: ?g,
+        BISHOP: ?g,
+        QUEEN: ?g,
+        KING: ?g,
+    }
+    
+    array = 
+"b......r......b
+.b.....r.....b.
+..b....r....b..
+...b...r...b...
+....b..r..b....
+.....bnPnb.....
+.....nxpxn.....
+rrrrrrR_Rrrrrrr
+.....nBRBn.....
+.....bnrnb.....
+....b..r..b....
+...b...r...b...
+..b....r....b..
+.b.....r.....b.
+b......r......b".split("\n")
+
+    dot_color = ?c
+    dot_color.set(rgb(0, 0, 0, 0.5), 0, true) // blending LMAO!!!! !!! 😆😆😆😆haha
+    
+    let dot_groups = []
+
+    for j in 0..array.length {
+        for i in 0..array[j].length {
+            if array[j][i] in "._\n\r " { continue }
+            $.print(array[j][i])
+            groups = match array[j][i] { // all pieces that can possibly have these moves
+                =="n": [GROUP_IDS.KNIGHT],
+                =="b": [GROUP_IDS.BISHOP, GROUP_IDS.QUEEN],
+                =="r": [GROUP_IDS.ROOK, GROUP_IDS.QUEEN],
+                =="x": [GROUP_IDS.PAWN_KILL, GROUP_IDS.BISHOP, GROUP_IDS.KING, GROUP_IDS.QUEEN], // pawn kill square
+                =="p": [GROUP_IDS.PAWN, GROUP_IDS.STARTING_PAWN, GROUP_IDS.KING, GROUP_IDS.ROOK, GROUP_IDS.QUEEN],
+                =="P": [GROUP_IDS.STARTING_PAWN, GROUP_IDS.ROOK, GROUP_IDS.QUEEN],
+                =="R": [GROUP_IDS.ROOK, GROUP_IDS.KING, GROUP_IDS.QUEEN],
+                =="B": [GROUP_IDS.BISHOP, GROUP_IDS.KING, GROUP_IDS.QUEEN]
+            }
+
+            current_dot_group = ?g
+            dot_groups.push(current_dot_group)
+            $.add(obj{ // dot
+                OBJ_ID: 725,
+                X: offset_x + i*30,
+                Y: offset_y + j*30,
+                COLOR: dot_color,
+                EDITOR_LAYER_1: 2,
+                GROUPS: groups + [current_dot_group],
+            })
+
+            // also add collision block here to check whether the dot should show when the collision checker
+            // thing checks if a piece is on that square or something idfk
+        }
+    }
+
+    return {
+        DOT_GROUPS: dot_groups,
+        GROUP_IDS: GROUP_IDS,
+    }
+}
+
 __board = init_board()
 piece_mapped_board = __board.counter_board
 color_mapped_board = __board.collision_board
+visible_board_scale = @pwn::new(offset_x, offset_y) // ????????????????
 
+__selector = init_selector()
+dot_groups = __selector.DOT_GROUPS
+dot_groups_grouped_by_pieces = __selector.GROUP_IDS
 
 $.print(__board)
+$.print(__selector)
+
+
+
+
+
+
 
 
 
