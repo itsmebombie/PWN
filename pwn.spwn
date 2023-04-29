@@ -12,7 +12,8 @@ white_color.set(WHITE)
 
 type @pwn
 impl @pwn {
-    new: (x_pos: @number = 0, y_pos: @number = 0, scale: @number = 1) {
+    // creates the playfield grid
+    new: (x_pos: @number = 0, y_pos: @number = 0, scale: @number = 1, group: @group|[@group] = ?g) {
         for x in 0..8 {
             for y in 0..8 {
                 $.add(obj {
@@ -22,11 +23,15 @@ impl @pwn {
                     SCALING: scale + 0.01, // fix visual move glitching
                     // TODO: check if color black is in the left bottom edge
                     COLOR: white_color if (x % 2 + (y + 1) % 2) % 2 == 0 else black_color,
+                    GROUPS: group,
                 })
             }
         }
         return @pwn::{
-            scale,
+            x: x_pos,
+            y: y_pos,
+            groups: group,
+            scale: scale,
         }
     },
 }
